@@ -16,6 +16,13 @@ from sensor_msgs.msg import JointState
 
 
 import matplotlib.pyplot as plt
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["Times New Roman"],
+    "font.size": 10,
+    "axes.labelsize": 11,
+    "legend.fontsize": 10
+})
 from scipy.signal import butter, decimate, filtfilt
 
 from utils.casadi_utils import *
@@ -354,6 +361,29 @@ class TrajectoryManager:
         return fig_q, fig_qd, fig_qdd, fig_tau
 
 
+    def compute_ne(self, robot):
+        tau_ne = []
+        pi_red = robot.get_par_REG_red()
+        pi_dl = robot.get_par_Dl()
+        for i in range(self.t.shape[0]):
+            q = self.q[i,:]
+            dq = self.qd[i,:]
+            ddq = self.qdd[i,:]
+
+            robot.set_q(q)
+            robot.set_dq(dq)
+            robot.set_ddq(ddq)
+            robot.set_dqr(dq)
+            robot.set_ddqr(ddq)
+
+            Y_red = robot.get_Yr_red()
+            Y_dl = robot.get_reg_dl()
+
+            tau_est = (Y_red@pi_red + Y_dl@pi_dl).flatten()
+            tau_ne.append(tau_est)
+
+        tau_ne = np.array(tau_ne)
+        return tau_ne
 
     def plot_traject_recostructed(self, robot, block = True):
         delta_tau = []

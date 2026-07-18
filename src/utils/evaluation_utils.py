@@ -7,10 +7,18 @@ import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["Times New Roman"],
+    "font.size": 10,
+    "axes.labelsize": 11,
+    "legend.fontsize": 10
+})
 
 from utils.identification_utils import *
 
-def plot_eval_identification(robot, metrics, traject, robot_gt = None, block = True):
+def plot_eval_identification(robot, metrics, traject, robot_gt = None, block = True,
+                    title_size = 20, suptitle_size = 24, lable_size = 16, tick_size = 14, legend_size = 13):
     """ Plot measurement and reconstructed effort """
     delta_tau = []
     delta_tau_GT = []
@@ -61,23 +69,30 @@ def plot_eval_identification(robot, metrics, traject, robot_gt = None, block = T
     plt.suptitle(f'Torque Estimation Results\nRMSE: {rmse:.4f} Nm | Conditioning Number (κ): {cond_num}', 
                 fontsize=16, fontweight='bold')
     for i in range(n):
-        plt.subplot(rows, cols,i+1)
-        #plt.plot(t_log, tau_ori[:,i], label = 'tau')
-        plt.plot(traject.t, traject.tau_raw[:,i], 
+        ax = plt.subplot(rows, cols, i + 1)
+        ax.plot(traject.t, traject.tau_raw[:, i],
                 color=colors['measured'], linewidth=2, label=r'$\tau$')
-
-        plt.plot(traject.t, traject.tau[:,i] - delta_tau[:,i], 
+        ax.plot(traject.t, traject.tau[:, i] - delta_tau[:, i],
                 color=colors['estimate'], linewidth=1.5, label=r'$\hat{\tau}$')
-
-        plt.plot(traject.t, traject.tau[:,i] - delta_tau_GT[:,i], 
+        ax.plot(traject.t, traject.tau[:, i] - delta_tau_GT[:, i],
                 color=colors['ground-truth'], linewidth=1.5, label=r'$\tau_{GT}$')
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('Torque [Nm]')
+        ax.set_title(f'Torque {JOINT_NAMES[i]}')
+        ax.grid(True)
+        if i == 0:
+            ax.legend(loc='lower right')
+        # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+        ax.title.set_fontsize(title_size)
+        ax.xaxis.label.set_fontsize(lable_size)
+        ax.yaxis.label.set_fontsize(lable_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        legend = ax.get_legend()
+        if legend:
+            for text in legend.get_texts():
+                    text.set_fontsize(legend_size)
+    ax.title.set_fontsize(suptitle_size)
 
-        plt.xlabel('Time [s]')
-        plt.ylabel('Torque [Nm]')
-        plt.title(f'Torque {JOINT_NAMES[i]}')
-        plt.grid(True)
-        if i==0:
-            plt.legend(loc='lower right')
     plt.tight_layout()
     plt.show(block=block)
 
@@ -86,7 +101,8 @@ def plot_eval_identification(robot, metrics, traject, robot_gt = None, block = T
 
 
 
-def plot_eval_LS_solution(hat_pi, metrics, robot_gt = None, block = True):
+def plot_eval_LS_solution(hat_pi, metrics, robot_gt = None, block = True,
+                    title_size = 20, suptitle_size = 24, lable_size = 16, tick_size = 14, legend_size = 13):
     """ Plot Base parameters estim as boxplot """
     # Create an array of indices for the x-axis
     x = np.arange(len(hat_pi))
@@ -102,13 +118,24 @@ def plot_eval_LS_solution(hat_pi, metrics, robot_gt = None, block = True):
     plt.errorbar(x, hat_pi.flatten(), yerr=metrics['parameters standard deviation'].flatten(), fmt='bo', ecolor='red', 
                 capsize=5, elinewidth=1.5, label='Estimated hat_pi')
 
-    # Formatting
-    plt.xlabel('Parameter Index')
-    plt.ylabel('Parameter Value')
-    plt.title('Parameter Estimation vs. Ground Truth')
-    plt.xticks(x) # Ensures we get a tick for every parameter index
-    plt.legend(loc='lower right')
-    plt.grid(True, linestyle='--', alpha=0.6)
+    ax = plt.gca()
+    ax.set_xlabel('Parameter Index')
+    ax.set_ylabel('Parameter Value')
+    ax.set_title('Parameter Estimation vs. Ground Truth')
+    ax.set_xticks(x)
+    ax.legend(loc='lower right')
+    ax.grid(True, linestyle='--', alpha=0.6)
+    # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+    ax.title.set_fontsize(title_size)
+    ax.xaxis.label.set_fontsize(lable_size)
+    ax.yaxis.label.set_fontsize(lable_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+    legend = ax.get_legend()
+    if legend:
+        for text in legend.get_texts():
+                text.set_fontsize(legend_size)
+    ax.title.set_fontsize(suptitle_size)
+
 
     plt.tight_layout()
     plt.show(block = block)
@@ -348,7 +375,8 @@ def plot_table(robot, robot_ground_truth, format = 'plain'):
                 print(row_str)
 
 
-def plot_link_solution(robot, robot_gt, n, title = None, block = True):
+def plot_link_solution(robot, robot_gt, n, title = None, block = True,
+                    title_size = 20, suptitle_size=24, lable_size = 16, tick_size = 14, legend_size = 13):
     """
     Plot estimated dynamic parameters of a single robot link against their ground-truth
 
@@ -396,10 +424,9 @@ def plot_link_solution(robot, robot_gt, n, title = None, block = True):
 
     # 4. Create Subplots
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-    if title is not None:
-        fig.suptitle(title)
-    else:
-        fig.suptitle(f"Estimation of link {n}")
+    sup = title if title is not None else f"Estimation of link {n}"
+    fig.suptitle(sup, fontsize=suptitle_size, fontweight='bold')
+
 
     width = 0.35
     # Subplot A: Mass
@@ -424,7 +451,18 @@ def plot_link_solution(robot, robot_gt, n, title = None, block = True):
     axes[2].set_title('Inertia (kg·m²)', fontweight='bold')
     axes[2].legend()
     axes[2].grid(axis='y', linestyle='--', alpha=0.6)
+    for ax in axes:
+        # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+        ax.title.set_fontsize(title_size)
+        ax.xaxis.label.set_fontsize(lable_size)
+        ax.yaxis.label.set_fontsize(lable_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        legend = ax.get_legend()
+        if legend:
+            for text in legend.get_texts():
+                    text.set_fontsize(legend_size)
 
+    ax.title.set_fontsize(suptitle_size)
     plt.tight_layout()
     plt.show(block = block)
     return fig

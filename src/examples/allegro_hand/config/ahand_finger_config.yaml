@@ -6,7 +6,7 @@ trajectory:
   bag: '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_4traject_bag'
   topic: '/allegroHand_0/joint_states'
   joints: ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']  # Middle joints
-  interval: [0, 500] # [s]
+  interval: [200, 500] # [s]
 
 # processing:
 #   cut_off_frequency: 30 # [rad/s]
@@ -31,7 +31,7 @@ processing:
 
 identification:
   method: 'WLS' # OLS, WLS, OLS|prior, WLS|prior
-  #conditioning_ratio: 500 # truncate SVD inverse by forcing this conditioning ( Default: None)
+  conditioning_ratio: 500 # truncate SVD inverse by forcing this conditioning ( Default: None)
   optimization: 'ipopt'  # 'ipopt', 'SA' - Optimization method for maximum-likelihood estimation
   # Simulated annealing ----
   k: 12               # max number of outer iteration for simulated annealing solver

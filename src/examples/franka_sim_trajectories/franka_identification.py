@@ -89,6 +89,11 @@ import utils.import_thunder as thunder
 
 franka_ground_truth = thunder.thunder_franka()
 thunder.load_params(franka_ground_truth, "/home/leo/Desktop/Base Inertial Parameter/src/thunder/franka_generatedFiles/param/franka_SH_par.yaml")
+franka_ground_truth.set_par_REG(franka_ground_truth.get_dyn2reg())
+franka_ground_truth.set_par_REG_red(franka_ground_truth.get_reg2red())
+
+
+csv_filename =  '/home/leo/Desktop/Base Inertial Parameter/src/examples/franka_sim_trajectories/bp_data.csv'
 
 # Dictionaries to hold results for table automation
 trajectories = ['Fourier', 'Chirp', 'Sinusoidal']
@@ -100,6 +105,7 @@ config_files = {
 
 cond_numbers = {}
 sigmas_max = {}
+traces = {}
 estimated_vals = {}
 std_deviations = {}
 
@@ -121,12 +127,14 @@ for traj in trajectories:
     # Store matrix estimation metrics
     cond_numbers[traj] = identifier.metrics['conditioning number']
     sigmas_max[traj] = identifier.metrics['sigma max']
+    traces[traj] = identifier.metrics['trace']
     std_deviations[traj] = identifier.metrics['parameters standard deviation']
     estimated_vals[traj] = franka.get_par_REG_red().copy()
 
 # Extract the true base inertial parameter values from your ground truth instance
 # depending on whether it stores a dict structure or numeric sequence array
-gt_source = franka_ground_truth.get_par_REG_red()
+gt_source = franka_ground_truth.get_par_REG_red().copy()
+print(gt_source)
 
 # -------- LaTeX Table Automation Generation --------
 print("\n" + "="*20 + " GENERATING LATEX TABLE " + "="*20 + "\n")
@@ -144,15 +152,27 @@ def clean_cond(val):
     return float(val)
 
 # Updated Header Row with Ground Truth element header included
+#header_row = (
+#    rf"\textbf{{Base Parameters}} & "
+#    rf"\textbf{{Ground Truth}} & "
+#    rf"\textbf{{Fourier}} ($\kappa={clean_cond(cond_numbers['Fourier']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Fourier']):.2f}$) & "
+#    rf"\textbf{{Chirp}} ($\kappa={clean_cond(cond_numbers['Chirp']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Chirp']):.2f}$) & "
+#    rf"\textbf{{Sinusoidal}} ($\kappa={clean_cond(cond_numbers['Sinusoidal']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Sinusoidal']):.2f}$) \\"
+#)
 header_row = (
     rf"\textbf{{Base Parameters}} & "
     rf"\textbf{{Ground Truth}} & "
-    rf"\textbf{{Fourier}} ($\kappa={clean_cond(cond_numbers['Fourier']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Fourier']):.2f}$) & "
-    rf"\textbf{{Chirp}} ($\kappa={clean_cond(cond_numbers['Chirp']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Chirp']):.2f}$) & "
-    rf"\textbf{{Sinusoidal}} ($\kappa={clean_cond(cond_numbers['Sinusoidal']):.2f}$, $\sigma_{{\max}}={clean_cond(sigmas_max['Sinusoidal']):.2f}$) \\"
+    rf"\textbf{{Fourier}} ($\kappa={clean_cond(cond_numbers['Fourier']):.2f}$, tr={clean_cond(traces['Fourier']):.2e}$) & "
+    rf"\textbf{{Chirp}} ($\kappa={clean_cond(cond_numbers['Chirp']):.2f}$, tr={clean_cond(traces['Chirp']):.2e}$) & "
+    rf"\textbf{{Sinusoidal}} ($\kappa={clean_cond(cond_numbers['Sinusoidal']):.2f}$, tr={clean_cond(traces['Sinusoidal']):.2e}$) \\"
 )
+csv_rows = ["parameter,gt,fourier_est,fourier_std,chirp_est,chirp_std,sine_est,sine_std"]
+
 latex_str.append(header_row)
 latex_str.append(r"\hline")
+
+
+
 
 def get_float_val(data_source, idx):
     """Safely extracts metric data value as native python float."""
@@ -194,13 +214,18 @@ for i, item in enumerate(base_param_names):
     std_s = get_float_val(std_deviations['Sinusoidal'], i)
     
     row = (
-        rf"{param_latex} & "
-        rf"{val_gt:.4f} & "  # Added Ground Truth output
-        rf"{val_f:.4f} ($\pm$ {std_f:.4f}) & "
-        rf"{val_c:.4f} ($\pm$ {std_c:.4f}) & "
-        rf"{val_s:.4f} ($\pm$ {std_s:.4f}) \\"
+        rf"{i+1}. {param_latex} & "
+        rf"{val_gt:.2e} & "  # Added Ground Truth output
+        rf"{val_f:.2e} ($\pm$ {std_f:.2e}) & "
+        rf"{val_c:.2e} ($\pm$ {std_c:.2e}) & "
+        rf"{val_s:.2e} ($\pm$ {std_s:.2e}) \\"
     )
+
     latex_str.append(row)
+
+    csv_row = f"{i+1},{val_gt:.2e},{val_f:.2e},{std_f:.2e},{val_c:.2e},{std_c:.2e},{val_s:.2e},{std_s:.2e}"
+    csv_rows.append(csv_row)
+
 
 latex_str.append(r"\hline")
 latex_str.append(r"\end{tabular}")
@@ -209,11 +234,20 @@ latex_str.append(r"\caption{Ground Truth comparison and Percentage Error ($\pm$ 
 latex_str.append(r"\label{tab:reduced_base_params_comparison}")
 latex_str.append(r"\end{table*}")
 
+
+
+
 print("\n".join(latex_str))
+
+
+with open(csv_filename, "w") as file:
+    file.write("\n".join(csv_rows) + "\n")
+print(f"\n[INFO] CSV data successfully saved to: {csv_filename}\n")
+
+
 
 # -------- Printing Max/Min Metrics with Indices --------
 print("\n" + "="*20 + " ADDITIONAL METRICS METADATA " + "="*20 + "\n")
-
 # Convert estimations and ground truth cleanly to numpy arrays for vector math
 gt_arr = np.array([get_float_val(gt_source, i) for i in range(len(base_param_names))])
 fourier_arr = np.array([get_float_val(estimated_vals['Fourier'], i) for i in range(len(base_param_names))])

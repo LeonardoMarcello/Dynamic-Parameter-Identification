@@ -6,7 +6,7 @@ trajectory:
   bag: '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_thumb_2traject_bag'
   topic: '/allegroHand_0/joint_states'
   joints: ['joint_12_0', 'joint_13_0', 'joint_14_0', 'joint_15_0']  # Thumb joints
-  interval: [0, 500] # [s]
+  interval: [200, 500] # [s]
 
 processing:
   pipeline:   # Which pipeline apply for data processing ['filtering','differentiating','decimating'] 

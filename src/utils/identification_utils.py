@@ -8,6 +8,13 @@ import numpy as np
 import yaml
 
 import matplotlib.pyplot as plt
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["Times New Roman"],
+    "font.size": 10,
+    "axes.labelsize": 11,
+    "legend.fontsize": 10
+})
 
 import casadi
 from utils.casadi_utils import *
@@ -121,12 +128,12 @@ def solve_OLS(robot, traject, conditioning_ratio = None):
         pseudo_inv =  np.linalg.pinv(YY.T @ YY)
 
     hat_pi = pseudo_inv @ YY.T @ TTau
-
     # > Compute Solution metrics
     metrics = {}
     metrics['observable base parameters mask'] = observable_mask
     metrics['conditioning number'] = np.linalg.cond(YY)
     metrics['sigma max'] = np.sqrt(np.max(np.linalg.eigvals(YY.T@YY)))
+    metrics['trace'] = np.trace(YY.T@YY)
 
     residual = TTau - YY @ hat_pi
     metrics['residual'] = np.linalg.norm(residual)
@@ -181,6 +188,8 @@ def solve_OLS_with_prior(robot, traject, conditioning_ratio = None):
     metrics['observable base parameters mask'] = observable_mask
     metrics['conditioning number'] = np.linalg.cond(YY)
     metrics['sigma max'] = np.sqrt(np.max(np.linalg.eigvals(YY.T@YY)))
+    metrics['trace'] = np.trace(YY.T@YY)
+
 
     residual = TTau - YY @ hat_pi
     metrics['residual'] = np.linalg.norm(residual)
@@ -271,6 +280,8 @@ def solve_WLS(robot, traject, conditioning_ratio = None):
     metrics['observable base parameters mask'] = observable_mask
     metrics['conditioning number'] = np.linalg.cond(YY)
     metrics['sigma max'] = np.sqrt(np.max(np.linalg.eigvals(YY.T@YY)))
+    metrics['trace'] = np.trace(YY.T@YY)
+
 
     residual = TTau_weighted - YY_weighted @ hat_pi
     metrics['residual'] = np.linalg.norm(residual)
@@ -357,6 +368,8 @@ def solve_WLS_with_prior(robot, traject, conditioning_ratio = 50):
     metrics['observable base parameters mask'] = observable_mask
     metrics['conditioning number'] = np.linalg.cond(YY)
     metrics['sigma max'] = np.sqrt(np.max(np.linalg.eigvals(YY.T@YY)))
+    metrics['trace'] = np.trace(YY.T@YY)
+
 
     residual = TTau_weighted - YY_weighted @ hat_pi
     metrics['residual'] = np.linalg.norm(residual)
@@ -1013,7 +1026,8 @@ def LMI_projection(robot, weights = None,psd_tol = 1e-5):
 
 
 
-def plot_base_identification(robot, traject, metrics, block = True):
+def plot_base_identification(robot, traject, metrics, block = True,
+                             title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13):
     """
     Plot of the reconstructed dynamic
 
@@ -1075,27 +1089,38 @@ def plot_base_identification(robot, traject, metrics, block = True):
     except Exception as e:
         plt.suptitle(f'Torque Estimation Results\nRMSE: {rmse:.4f} Nm | Conditioning Number (κ): {cond_num}| Sigma max: {sigma_max}', 
                 fontsize=16, fontweight='bold')
+    
     for i in range(n):
-        plt.subplot(rows, cols,i+1)
-        #plt.plot(t_log, tau_ori[:,i], label = 'tau')
-        plt.plot(traject.t, traject.tau[:,i], 
-                color=colors['measured'], linewidth=2, label='tau_filtered')
+            ax = plt.subplot(rows, cols, i + 1)
+            ax.plot(traject.t, traject.tau[:, i],
+                    color=colors['measured'], linewidth=2, label='tau_filtered')
+            ax.plot(traject.t, traject.tau[:, i] - delta_tau[:, i],
+                    color=colors['estimate'], linewidth=1.5, label='hat_tau')
+            ax.set_xlabel('Time [s]')
+            ax.set_ylabel('Torque [Nm]')
+            ax.set_title(f'Torque {JOINT_NAMES[i]}')
+            ax.grid(True)
+            if i == 0:
+                ax.legend()
+            # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+            ax.title.set_fontsize(title_size)
+            ax.xaxis.label.set_fontsize(lable_size)
+            ax.yaxis.label.set_fontsize(lable_size)
+            ax.tick_params(axis='both', labelsize=tick_size)
+            legend = ax.get_legend()
+            if legend:
+                for text in legend.get_texts():
+                    text.set_fontsize(legend_size)
 
-        plt.plot(traject.t, traject.tau[:,i] - delta_tau[:,i], 
-                color=colors['estimate'], linewidth=1.5, label='hat_tau')
-        plt.xlabel('Time [s]')
-        plt.ylabel('Torque [Nm]')
-        plt.title(f'Torque {JOINT_NAMES[i]}')
-        plt.grid(True)
-        if i==0:
-            plt.legend()
+
     plt.tight_layout()
     plt.show(block=block)
 
     return fig
 
 
-def plot_identification(robot, traject, metrics, title = None,block = True):
+def plot_identification(robot, traject, metrics, title = None,block = True,
+                        title_size = 20, suptitle_size = 24, lable_size = 16, tick_size = 14, legend_size = 13):
     """
     Plot of the reconstructed dynamic
 
@@ -1176,50 +1201,42 @@ def plot_identification(robot, traject, metrics, title = None,block = True):
     else:
         sigma_max_title = r"$\sigma_{max}$" 
         try:
-            plt.suptitle(f'Torque Estimation Results - Method {metrics["method"]} (RMSE: {rmse:.4f} Nm)\nConditioning Number (κ): {cond_num}| {sigma_max_title}: {sigma_max}', 
+            plt.suptitle(f'Torque Estimation Results - Method {metrics["method"]} (RMSE: {rmse:.4f} Nm)\nConditioning Number (κ): {cond_num:.3f}| {sigma_max_title}: {sigma_max:.3f}', 
                         fontsize=16, fontweight='bold')
         except Exception as e:
-            plt.suptitle(f'Torque Estimation Results (RMSE: {rmse:.4f} Nm)\nConditioning Number (κ): {cond_num}| {sigma_max_title}: {sigma_max}', 
+            #plt.suptitle(f'Torque Estimation Results (RMSE: {rmse:.4f} Nm)\nConditioning Number (κ): {cond_num}| {sigma_max_title}: {sigma_max}', 
+            #        fontsize=16, fontweight='bold')
+            plt.suptitle(f'Torque Estimation Results (RMSE: {rmse:.4f} Nm)', 
                     fontsize=16, fontweight='bold')
     for i in range(n):
-        plt.subplot(rows, cols,i+1)
-        #plt.plot(t_log, tau_ori[:,i], label = 'tau')
-        plt.plot(traject.raw_t, traject.raw_tau[:,i], 
-                color=colors['measured'], linewidth=2, label=r'$\tau$')
+        ax = plt.subplot(rows, cols, i + 1)
+        ax.plot(traject.t, traject.tau[:, i],
+                color=colors['measured'], linewidth=2, label='tau_filtered')
+        ax.plot(traject.t, traject.tau[:, i] - delta_tau[:, i],
+                color=colors['estimate'], linewidth=1.5, label='hat_tau')
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('Torque [Nm]')
+        ax.set_title(f'Torque {JOINT_NAMES[i]}')
+        ax.grid(True)
+        if i == 0:
+            ax.legend()
+        # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+        ax.title.set_fontsize(title_size)
+        ax.xaxis.label.set_fontsize(lable_size)
+        ax.yaxis.label.set_fontsize(lable_size)
+        ax.tick_params(axis='both', labelsize=tick_size)
+        legend = ax.get_legend()
+        if legend:
+            for text in legend.get_texts():
+                    text.set_fontsize(legend_size)
 
-        plt.plot(traject.t, traject.tau[:,i] - delta_tau[:,i], 
-                color=colors['estimate'], linewidth=1.5, label=r'$\hat{\tau}$')
-
-        # # Individual components use dotted or dashed lines for clarity
-        # plt.plot(traject.t, tau_M[:,i], color=colors['mass'], 
-        #         linestyle='--', alpha=0.8, label='hat_tau_M')
-
-        # plt.plot(traject.t, tau_C[:,i], color=colors['coriolis'], 
-        #         linestyle=':', alpha=0.8, label='hat_tau_C')
-
-        # plt.plot(traject.t, tau_G[:,i], color=colors['gravity'], 
-        #         linestyle='-.', alpha=0.8, label='hat_tau_G')
-
-        # plt.plot(traject.t, tau_dl[:,i], color=colors['friction'], 
-        #         linestyle='dotted', alpha=0.7, label='hat_tau_dl')
-        # try:
-        #     tau_est_Ia = robot.get_Ia()
-        #     plt.plot(traject.t, tau_Ia[:,i], color=colors['motor'], 
-        #             linestyle='dotted', alpha=0.7, label='hat_tau_Ia')
-        # except:
-        #     pass
-        plt.xlabel('Time [s]')
-        plt.ylabel('Torque [Nm]')
-        plt.title(f'Torque {JOINT_NAMES[i]}')
-        plt.grid(True)
-        if i==0:
-            plt.legend()
     plt.tight_layout()
     plt.show(block=block)
 
     return fig
 
-def plot_LS_solution(hat_pi, metrics, pi_gt = None, block = True):
+def plot_LS_solution(hat_pi, metrics, pi_gt = None, block = True,
+                    title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13):
     """
     Box Plot representation for visualization of estimated base parameters 
 
@@ -1246,13 +1263,25 @@ def plot_LS_solution(hat_pi, metrics, pi_gt = None, block = True):
     plt.errorbar(x, hat_pi.flatten(), yerr=metrics['parameters standard deviation'].flatten(), fmt='bo', ecolor='red', 
                 capsize=5, elinewidth=1.5, label='Estimated hat_pi')
 
-    # Formatting
-    plt.xlabel('Parameter Index')
-    plt.ylabel('Parameter Value')
-    plt.title('Parameter Estimation vs. Ground Truth')
-    plt.xticks(x) # Ensures we get a tick for every parameter index
-    plt.legend()
-    plt.grid(True, linestyle='--', alpha=0.6)
+    ax = plt.gca()
+    ax.set_xlabel('Parameter Index')
+    ax.set_ylabel('Parameter Value')
+    ax.set_title('Parameter Estimation vs. Ground Truth')
+    ax.set_xticks(x)
+    ax.legend()
+    ax.grid(True, linestyle='--', alpha=0.6)
+    # Axis-Style (title_size = 20, lable_size = 16, tick_size = 14, legend_size = 13)
+    ax.title.set_fontsize(title_size)
+    ax.xaxis.label.set_fontsize(lable_size)
+    ax.yaxis.label.set_fontsize(lable_size)
+    ax.tick_params(axis='both', labelsize=tick_size)
+    legend = ax.get_legend()
+    if legend:
+        for text in legend.get_texts():
+            text.set_fontsize(legend_size)
+    # suptitle not used here but keep title consistent
+    ax.title.set_fontsize(font.suptitle)
+
 
     plt.tight_layout()
     plt.show(block=block)
