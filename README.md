@@ -295,38 +295,40 @@ results/
 
 The data processing pipeline and its parametes can be defined in the config file
 
-### 2. **Base Paramter Estimation**
+### 2. **Base Parameter Estimation**
 Build the extended regressor equation:
-$\boldsymbol{Y} = \boldsymbol{W}\pi_b$
-   - OLS: $\hat{\pi}^{ols}_b = \boldsymbol{W}^\dagger \boldsymbol{Y}$
-   - WLS: $\hat{\pi}^{wls}_b = \tilde{\boldsymbol{W}}^\dagger \tilde{\boldsymbol{Y}}$
-   - LS|prior: $\hat{\pi}^{prior}_b = \hat{\pi}_{b,0} + \boldsymbol{W}^\dagger (\boldsymbol{Y} - \boldsymbol{W} \hat{\pi}_{b,0})$
+$\boldsymbol{Y} = \boldsymbol{W}\boldsymbol{\pi}_b$
+   - OLS: $\hat{\boldsymbol{\pi}}^{\text{ols}}_b = \boldsymbol{W}^\dagger \boldsymbol{Y}$
+   - WLS: $\hat{\boldsymbol{\pi}}^{\text{wls}}_b = \tilde{\boldsymbol{W}}^\dagger \tilde{\boldsymbol{Y}}$
+   - LS|prior: $`\hat{\boldsymbol{\pi}}^{\text{prior}}_{b} = \hat{\boldsymbol{\pi}}_{b,0} + \boldsymbol{W}^\dagger (\boldsymbol{Y} - \boldsymbol{W} \hat{\boldsymbol{\pi}}_{b,0})`$ 
 
 ### 3. **Least-Squares Estimation**
    - Solve: 
-$$\begin{aligned}
-\min_{\boldsymbol{\pi}_{DYN}} \quad & (\boldsymbol{\pi}^* - \boldsymbol{\pi}_b(\boldsymbol{\pi}_{DYN}))^\top \mathbf{C}_{\boldsymbol{\pi} \boldsymbol{\pi}}^{-1} (\boldsymbol{\pi}^* - \boldsymbol{\pi}_b(\boldsymbol{\pi}{DYN})) + \\
-& + (\boldsymbol{\pi}_0 - \boldsymbol{\pi}_{DYN})^\top \Sigma_0^{-1} (\boldsymbol{\pi}_0 - \boldsymbol{\pi}_{DYN}) \\
-\textrm{s.t.} \quad & m_i > 0, \quad \forall i \in {1, \dots, N} \\
-& \mathbf{P}_i \succ 0, \quad \forall i \in {1, \dots, N}
-\end{aligned}$$
+```math
+\begin{aligned}
+\min_{\boldsymbol{\pi}_{\text{DYN}}} \quad & (\boldsymbol{\pi}^* - \boldsymbol{\pi}_b(\boldsymbol{\pi}_{\text{DYN}}))^\top \mathbf{C}_{\boldsymbol{\pi} \boldsymbol{\pi}}^{-1} (\boldsymbol{\pi}^* - \boldsymbol{\pi}_b(\boldsymbol{\pi}_{\text{DYN}})) + \\
+& (\boldsymbol{\pi}_0 - \boldsymbol{\pi}_{\text{DYN}})^\top \boldsymbol{\Sigma}_0^{-1} (\boldsymbol{\pi}_0 - \boldsymbol{\pi}_{\text{DYN}}) \\
+\textrm{s.t.} \quad & m_i > 0, \quad \forall i \in \{1, \dots, N\} \\
+& \mathbf{P}_i \succ 0, \quad \forall i \in \{1, \dots, N\}
+\end{aligned}
+```
 
 ### 4. **Robot Modeling**
-The Developed package relies on the robot model generated via the Thunder Dinamics software. In particular it allows to define:
-$$\begin{aligned}
-    \tau &= \boldsymbol{M}(q)\ddot{q} + \boldsymbol{C}(q,\dot{q})\dot{q} +\boldsymbol{G}(q) + \tau_f + \tau_{Ia}\\
-    \tau_f &= \boldsymbol{F}\dot{q} + \boldsymbol{D}\textit{sign}(\dot{q})\\  
-    \tau_{Ia} &= \boldsymbol{I}_a\ddot{q}
-\end{aligned}$$
+The developed package relies on the robot model generated via the Thunder Dynamics software. In particular, it allows to define:
+```math
+\begin{aligned}
+\boldsymbol{\tau} &= \boldsymbol{M}(\boldsymbol{q})\ddot{\boldsymbol{q}} + \boldsymbol{C}(\boldsymbol{q},\dot{\boldsymbol{q}})\dot{\boldsymbol{q}} +\boldsymbol{G}(\boldsymbol{q}) + \boldsymbol{\tau}_f + \boldsymbol{\tau}_{Ia} \\
+\boldsymbol{\tau}_f &= \boldsymbol{F}\dot{\boldsymbol{q}} + \boldsymbol{D}\text{sign}(\dot{\boldsymbol{q}}) \\  
+\boldsymbol{\tau}_{Ia} &= \boldsymbol{I}_a\ddot{\boldsymbol{q}}
+\end{aligned}
+```
 
-   - Mass Matrix: $\boldsymbol{M}(q)$
-   - Coriolis terms: $\boldsymbol{C}(q,\dot{q})$
-   - Gravity vector: $\boldsymbol{G}(q)$
-
-   - Viscous friction: $f_v = F \cdot \dot{q}$ (optional)
-   - Static friction: $f_s(q) = D \cdot sign(\dot{q})$ (optional)
-   - Rotor Inertia: $\tau_{Ia} = \boldsymbol{I}_a\ddot{q}$ (optional)
-
+   - Mass Matrix: $\boldsymbol{M}(\boldsymbol{q})$
+   - Coriolis terms: $\boldsymbol{C}(\boldsymbol{q},\dot{\boldsymbol{q}})$
+   - Gravity vector: $\boldsymbol{G}(\boldsymbol{q})$
+   - Viscous friction: $\boldsymbol{f}_v = \boldsymbol{F} \cdot \dot{\boldsymbol{q}}$ (optional)
+   - Static friction: $\boldsymbol{f}_s(\boldsymbol{q}) = \boldsymbol{D} \cdot \text{sign}(\dot{\boldsymbol{q}})$ (optional)
+   - Rotor Inertia: $\boldsymbol{\tau}_{Ia} = \boldsymbol{I}_a\ddot{\boldsymbol{q}}$ (optional)
 
 for more detail about the usage of [Thunder Dynamic](https://github.com/CentroEPiaggio/thunder_dynamics.git) software, please refer to its official repo.
 
