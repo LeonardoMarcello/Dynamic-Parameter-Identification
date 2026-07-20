@@ -18,13 +18,6 @@ for rel_path in rel_paths:
 
 # 2) Import modules
 #  --------------------------------------------------------------------
-# try:
-#     from thunder_ahand_thumb_py import thunder_ahand_thumb
-#     from thunder_ahand_finger_py import thunder_ahand_finger
-#     from thunder_franka_py import thunder_franka
-#     # from robot_name_py import robot_name
-# except ImportError as e:
-#     print(f"Error: Could not import a thunder module. {e}")
 
 import importlib
 thunder_ = {}
@@ -33,18 +26,15 @@ for path in sys.path:
     # Scan for any shared objects (.so) or dynamically built modules starting with thunder_
     for filename in os.listdir(path) if os.path.isdir(path) else []:
         if filename.startswith("thunder_") and (filename.endswith(".so") or filename.endswith(".pyd") or os.path.isdir(os.path.join(path, filename))):
-            # Extract the base module name (e.g., "thunder_franka_py")
+            # Extract the base module name (i.e., the robot name)
             module_name = filename.split('.')[0]
             if not module_name.endswith("_py"):
                 continue
-            # Derive the internal class/method matching your template structure: "thunder_franka"
             robot_name = module_name.replace("_py", "") 
             try:
                 # Dynamically import the module at runtime
                 module = importlib.import_module(module_name)
-                # Extract the constructor/class matching the name from the module
                 robot_class = getattr(module, robot_name)
-                # Store the class reference using a clean key (e.g., 'franka', 'ahand_thumb')
                 clean_key = robot_name.replace("thunder_", "")
                 thunder_[clean_key] = robot_class
                 print(f"[Thunder Import] Successfully auto-imported: {clean_key} from {module_name}")

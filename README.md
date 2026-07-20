@@ -23,7 +23,7 @@ The **full parameter identification** is implemented in CasADi using the solver:
 The **Results** are stored in a folder containing the following:
 - **Trajectory Plots**
 - **Reconstructed trajectory and metrics Plot**
-- **Thunder formatted configiguration file**
+- **Thunder formatted configuration file**
 
 ## Installation
 ### Option 1: Using Docker
