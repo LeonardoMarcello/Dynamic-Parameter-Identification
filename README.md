@@ -39,7 +39,7 @@ docker build -t dynamic-parameter-identification:latest -f docker/Dockerfile .
 ```bash
 git clone https://github.com/LeonardoMarcello/Dynamic-Parameter-Identification.git
 
-cd dynamic_parameter_identification
+cd dynamic-parameter-identification
 
 conda env create -f environment.yaml
 conda activate dynamic_parameters_identification
@@ -179,6 +179,8 @@ Templates to ease the environment set-up:
 
       positive_threshold: 1e-16   # Positive threshold for constrained problem solver (Default: 1e-16)
       inertia_scale_factor: 1     # Scaling of inertia matrix to ease check on definitive positive costraint  (Default: 1)
+      numerical_eigen: false      # whether to use numerical approximation for semidefinite positiveness of inertia matrix costraint  (Default: false)
+
       weight:
         loss: 1         # gain factor for base parameters optimization (Default: 1)
         mass: 1e-3      # mass std.dev [Kg]

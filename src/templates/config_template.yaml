@@ -40,7 +40,7 @@ identification:
   # CasADi optimizer ----
   positive_threshold: 1e-16   # positive threshold for constrained problem solver (Default: 1e-16)
   inertia_scale_factor: 1     # scale inertia matrix to ease check on definitive positive costraint  (Default: 1)
-  numerical_eigen: false      # whether to use numerical approximation for semidefinite positiveness of inertia matrix   (Default: false)
+  numerical_eigen: false      # whether to use numerical approximation for semidefinite positiveness of inertia matrix costraint  (Default: false)
 
   weight:
     loss: 1         # gain factor for base parameters optimization (Default: 1)

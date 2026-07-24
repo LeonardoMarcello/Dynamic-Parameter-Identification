@@ -75,7 +75,7 @@ tau_optim = identifier.trajectory.compute_ne(franka)
         
 #         # Plot 1: Prior Estimate (Dashed Gray/Light Blue)
 #         ax.plot(time, tau_prior[:, i], label=r'$\hat{\tau}_{\mathrm{prior}}$', 
-#                 color='lightsteelblue', linestyle='--', linewidth=1.5)
+#                 color='black', linestyle='--', linewidth=1.5)
         
 #         # Plot 2: Optimized Estimate WLS (Solid Blue)
 #         ax.plot(time, tau_wls[:, i], label=r'$\hat{\tau}_{\mathrm{WLS}}$', 
