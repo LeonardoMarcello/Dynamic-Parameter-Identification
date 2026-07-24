@@ -14,7 +14,7 @@ docker build -t dynamic-parameter-identification:latest -f docker/Dockerfile .
 ## Running the Container
 
 ```bash
-docker run -it --rm -v $(pwd):/dynamic-parameter-identification dynamic-parameter-identifications:latest python src/examples/franka_real/franka_identification.py
+docker run -it --rm -v $(pwd):/dynamic-parameter-identification dynamic-parameter-identification:latest python src/examples/franka_real/franka_identification.py
 ```
 
 ## Environment Details
