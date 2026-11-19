@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\caption{Multi-start robustness of the MLE (101 starts per problem). Conv.: converged runs (with the sampled constraint). Spread statistics: means over runs and links of the relative deviation from the best run; RMSE range: largest spread of the held-out RMSE [N\,m]. Held-out RMSE [N\,m] and BIP error $\|\hat{\pi}_b-\pi_b\|/\|\pi_b\|$ of the best run (Sim.: Fourier/chirp/sinusoidal).}
+\label{tab:multistart}
+\centering\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{llcccccccc}
+\toprule
+\multicolumn{2}{l}{Case} & Conv. & Cost gap & $|\Delta m|/m^\star$ & $\|\Delta c\|/\|c^\star\|$ & $\|\Delta I\|_F/\|I^\star\|_F$ & \shortstack{RMSE\\range} & \shortstack{Held-out\\RMSE} & BIP err.\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Real\\Franka}} & Full window & 101/101 (40) & $1.8\cdot10^{-4}$ & $1.7\cdot10^{-4}$ & $1.4\cdot10^{-3}$ & $2.0\cdot10^{-3}$ & -- & -- & -- \\
+ & Fold A & 101/101 (16) & $3.0\cdot10^{-4}$ & $7.0\cdot10^{-5}$ & $1.5\cdot10^{-3}$ & $5.8\cdot10^{-3}$ & $6.7\cdot10^{-4}$ & 1.03 & -- \\
+ & Fold B & 101/101 (44) & $3.1\cdot10^{-4}$ & $5.8\cdot10^{-5}$ & $9.2\cdot10^{-4}$ & $5.0\cdot10^{-3}$ & $9.8\cdot10^{-4}$ & 0.75 & -- \\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Sim.\\CAD}} & $k=0.1$ & 303/303 (44) & $3.7\cdot10^{-6}$ & $3.5\cdot10^{-7}$ & $3.2\cdot10^{-6}$ & $3.2\cdot10^{-4}$ & $2.2\cdot10^{-6}$ & 0.32/0.61/0.37 & 0.016/0.018/0.018 \\
+ & $k=1$ & 303/303 (177) & $4.8\cdot10^{-5}$ & $9.5\cdot10^{-5}$ & $5.3\cdot10^{-4}$ & $1.7\cdot10^{-3}$ & $1.7\cdot10^{-4}$ & 0.27/0.66/0.42 & 0.024/0.036/0.030 \\
+ & $k=10$ & 303/303 (269) & $5.3\cdot10^{-5}$ & $2.2\cdot10^{-4}$ & $6.4\cdot10^{-4}$ & $5.5\cdot10^{-3}$ & $1.0\cdot10^{-4}$ & 0.28/0.69/0.43 & 0.026/0.063/0.050 \\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Sim.\\Pert.}} & $k=0.1$ & 303/303 (91) & $4.9\cdot10^{-7}$ & $6.5\cdot10^{-8}$ & $7.8\cdot10^{-7}$ & $4.3\cdot10^{-5}$ & $1.2\cdot10^{-5}$ & 0.32/0.61/0.37 & 0.016/0.018/0.018 \\
+ & $k=1$ & 303/303 (223) & $5.3\cdot10^{-5}$ & $1.8\cdot10^{-4}$ & $8.5\cdot10^{-4}$ & $1.5\cdot10^{-3}$ & $2.1\cdot10^{-4}$ & 0.27/0.66/0.42 & 0.024/0.037/0.029 \\
+ & $k=10$ & 303/303 (193) & $1.1\cdot10^{-4}$ & $4.7\cdot10^{-4}$ & $1.4\cdot10^{-3}$ & $4.1\cdot10^{-3}$ & $4.9\cdot10^{-5}$ & 0.28/0.69/0.43 & 0.026/0.065/0.049 \\
+\bottomrule
+\end{tabular}
+\end{table*}

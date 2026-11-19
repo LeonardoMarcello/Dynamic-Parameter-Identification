@@ -4,7 +4,7 @@ robot:
 trajectory:
   type: 'ros2'
 
-  bag: './rosbag/softhand_chirp_CT'
+  bag: './rosbag/softhand_lean_chirp_CT'
 
   topic: '/computed_torque_controller/joint_states'
 

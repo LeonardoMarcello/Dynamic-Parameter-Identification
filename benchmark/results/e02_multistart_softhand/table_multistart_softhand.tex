@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\caption{Multi-start MLE on the three simulated Franka+SoftHand recordings (F/C/S: Fourier, chirp, sinusoidal) for six priors: Case~A std.\ dev.\ scaled by $k$, mean equal to the CAD values or perturbed (Pert.) by one draw $\sigma_k\xi$. 101 starts per problem, all converged. Cost gap: max.\ relative gap to the best run; RMSE range: max.\ spread of the held-out RMSE over the starts (both over the three trajectories). Held-out RMSE [N\,m] on the two other recordings; BP err.: $\|\hat{\pi}_b-\pi_b\|/\|\pi_b\|$; $m_7$ [kg]: last-link mass (ground truth 1.52).}
+\label{tab:multistart_softhand}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+Mean & $k$ & Cost gap & RMSE range & Prior only: RMSE / BP err. & Held-out RMSE (F/C/S) & BP err.\ (F/C/S) & $m_7$ (F/C/S)\\
+\midrule
+\multirow{3}{*}{CAD} & 0.1 & $2.1\cdot10^{-5}$ & $2.2\cdot10^{-6}$ & 5.14 / 0.11 & 0.32 / 0.61 / 0.37 & 0.016 / 0.018 / 0.018 & 0.95 / 0.96 / 0.96 \\
+ & 1 & $2.5\cdot10^{-4}$ & $1.7\cdot10^{-4}$ & 5.14 / 0.11 & 0.27 / 0.66 / 0.42 & 0.024 / 0.036 / 0.030 & 0.97 / 0.94 / 0.93 \\
+ & 10 & $2.7\cdot10^{-3}$ & $1.0\cdot10^{-4}$ & 5.14 / 0.11 & 0.28 / 0.69 / 0.43 & 0.026 / 0.063 / 0.050 & 0.84 / 0.96 / 0.94 \\
+\midrule
+\multirow{3}{*}{Pert.} & 0.1 & $1.6\cdot10^{-5}$ & $1.2\cdot10^{-5}$ & 5.21 / 0.11 & 0.32 / 0.61 / 0.37 & 0.016 / 0.018 / 0.018 & 0.95 / 0.96 / 0.96 \\
+ & 1 & $3.2\cdot10^{-4}$ & $2.1\cdot10^{-4}$ & 5.86 / 0.13 & 0.27 / 0.66 / 0.42 & 0.024 / 0.037 / 0.029 & 0.98 / 0.95 / 0.93 \\
+ & 10 & $2.2\cdot10^{-3}$ & $4.9\cdot10^{-5}$ & 11.72 / 0.45 & 0.28 / 0.69 / 0.43 & 0.026 / 0.065 / 0.049 & 0.87 / 0.96 / 1.09 \\
+\bottomrule
+\end{tabular}
+\end{table*}

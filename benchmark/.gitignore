@@ -1,0 +1,10 @@
+# Track only the benchmark code, the experiment scripts, their results and the docs.
+/*
+!/.gitignore
+!/bench/
+!/experiment/
+!/results/
+!/README.md
+!/run.sh
+__pycache__/
+*.pyc

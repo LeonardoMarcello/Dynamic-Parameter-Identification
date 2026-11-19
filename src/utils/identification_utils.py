@@ -313,7 +313,7 @@ def solve_WLS(robot:Any, traject:TrajectoryManager, conditioning_ratio:Optional[
     sigma_w_2 = np.zeros(robot.numJoints)   # effort measurements noise std.dev. at joint level
     nb_samples = YY.shape[0]            # num of samples
     p = YY.shape[1]                     # num of parameters
-    W_diag = np.zeros(nb_samples*robot.numJoints)
+    # W_diag = np.zeros(nb_samples*robot.numJoints)
 
     # pre-compute all effort residual
     residual = TTau - YY @ hat_pi
@@ -324,16 +324,21 @@ def solve_WLS(robot:Any, traject:TrajectoryManager, conditioning_ratio:Optional[
         denom = nb_samples - p
         sigma_w_2[i] = np.sqrt(np.linalg.norm(diff)**2 / denom)
 
-        # compute weight (inverse of std.dev) of joint i-th
-        for j in range(nb_samples):
-            W_diag[j + i*robot.numJoints] = 1 / sigma_w_2[i]
+        # # compute weight (inverse of std.dev) of joint i-th
+        # for j in range(nb_samples):
+        #     W_diag[j + i*robot.numJoints] = 1 / sigma_w_2[i]
 
     # compute weights multiplication for each joint
     YY_weighted = np.zeros_like(YY)
     TTau_weighted = np.zeros_like(TTau)
     for i in range(robot.numJoints):
-        YY_weighted[i::robot.numJoints,:] = W_diag[i]*YY[i::robot.numJoints, :] # apply weight for i-th raw
-        TTau_weighted[i::robot.numJoints] = W_diag[i]*TTau[i::robot.numJoints]  # apply weight for i-th value
+        # Previous  BUG (previous implementation): W_diag[i] equals 1/sigma_w_2[0] for every i, so all joints got the
+        # same weight and WLS returned exactly the OLS estimate and covariance.
+        # YY_weighted[i::robot.numJoints,:] = W_diag[i]*YY[i::robot.numJoints, :] # apply weight for i-th raw
+        # TTau_weighted[i::robot.numJoints] = W_diag[i]*TTau[i::robot.numJoints]  # apply weight for i-th value
+        w_i = 1 / sigma_w_2[i]          # weight (inverse of std.dev) of joint i-th
+        YY_weighted[i::robot.numJoints,:] = w_i*YY[i::robot.numJoints, :]   # apply weight for i-th raw
+        TTau_weighted[i::robot.numJoints] = w_i*TTau[i::robot.numJoints]    # apply weight for i-th value
 
     # Compute inverted matrix and solution
     r = p                # index of last singular value
@@ -423,7 +428,7 @@ def solve_WLS_with_prior(robot:Any, traject:TrajectoryManager, conditioning_rati
     sigma_w_2 = np.zeros(robot.numJoints)   # effort measurements noise std.dev. at joint level
     nb_samples = YY.shape[0]            # num of samples
     p = YY.shape[1]                     # num of parameters
-    W_diag = np.zeros(nb_samples*robot.numJoints)
+    # W_diag = np.zeros(nb_samples*robot.numJoints)
 
     residual = TTau - YY @ hat_pi
     for i in range(robot.numJoints):
@@ -432,16 +437,21 @@ def solve_WLS_with_prior(robot:Any, traject:TrajectoryManager, conditioning_rati
         denom = nb_samples - p
         sigma_w_2[i] = np.sqrt(np.linalg.norm(diff)**2 / denom)
 
-        # assign inverse for all samples of joint i-th
-        for j in range(nb_samples):
-            W_diag[j + i*robot.numJoints] = 1 / sigma_w_2[i]
+        # # assign inverse for all samples of joint i-th
+        # for j in range(nb_samples):
+        #     W_diag[j + i*robot.numJoints] = 1 / sigma_w_2[i]
 
     # compute weights multiplication for each joint
     YY_weighted = np.zeros_like(YY)
     TTau_weighted = np.zeros_like(TTau)
     for i in range(robot.numJoints):
-        YY_weighted[i::robot.numJoints,:] = W_diag[i]*YY[i::robot.numJoints, :] # apply weight for i-th raw
-        TTau_weighted[i::robot.numJoints] = W_diag[i]*TTau[i::robot.numJoints]  # apply weight for i-th value
+        # BUG (previous implementation): W_diag[i] equals 1/sigma_w_2[0] for every i, so all joints got the
+        # same weight and WLS returned exactly the OLS estimate and covariance.
+        # YY_weighted[i::robot.numJoints,:] = W_diag[i]*YY[i::robot.numJoints, :] # apply weight for i-th raw
+        # TTau_weighted[i::robot.numJoints] = W_diag[i]*TTau[i::robot.numJoints]  # apply weight for i-th value
+        w_i = 1 / sigma_w_2[i]          # weight (inverse of std.dev) of joint i-th
+        YY_weighted[i::robot.numJoints,:] = w_i*YY[i::robot.numJoints, :]   # apply weight for i-th raw
+        TTau_weighted[i::robot.numJoints] = w_i*TTau[i::robot.numJoints]    # apply weight for i-th value
 
     # Compute inverted matrix and solution
     r = p                 # num of parameters
@@ -939,7 +949,7 @@ def solve_dynamics(robot:Any, config:dict, sigma_pi: Optional[np.ndarray] = None
             print(f"Current best cost: {result.fun:.4f}")
             # Update our guess with the best state found in this SA run
             current_guess = result.x 
-            if check_par_DYN_feasibility(reg2dyn(current_guess),n, verbose=False): break # If the current guess is feasible, we can stop early
+            if check_par_DYN_feasibility(reg2dyn(current_guess),n, verbose=False).all(): break # If the current guess is feasible, we can stop early
 
         hat_par_REG_optim = current_guess
         print("\n--- Simulated Annealing Complete ---")
@@ -961,8 +971,17 @@ def solve_dynamics(robot:Any, config:dict, sigma_pi: Optional[np.ndarray] = None
     print(f"Loss: {results['loss']}, Mass: {results['mass']}, Center of Mass: {results['com']}, Tensor inertia: {results['inertia']}, Additional: {results['additional']}")
     print(f"Penalty check: {f_penalty_costraint_func(hat_par_REG_optim)}")
 
-    if not check_par_DYN_feasibility(reg2dyn(hat_par_REG_optim),n): 
-        print("[WARN] Estimated parameters do not pass feasibility check")
+    feas_links = check_par_DYN_feasibility(reg2dyn(hat_par_REG_optim),n)
+    if not feas_links.all():
+        print(f"[WARN] Estimated parameters do not pass feasibility check (links: {np.flatnonzero(~feas_links).tolist()}), they lie on feasibility bounds. Using LMI projection tring to force feasiblity")
+        hat_par_REG_optim = np.asarray(hat_par_REG_optim, dtype=float)
+        hat_par_DYN_optim = np.array(reg2dyn(hat_par_REG_optim[:10*n])).flatten()
+        hat_par_DYN_optim = LMI_projection(robot, par_DYN=hat_par_DYN_optim, links=np.flatnonzero(~feas_links).tolist())
+        hat_par_REG_optim[:10*n] = np.array(dyn2reg(casadi.DM(hat_par_DYN_optim))).reshape(hat_par_REG_optim[:10*n].shape)  # motor inertia untouched
+        if not check_par_DYN_feasibility(reg2dyn(hat_par_REG_optim),n).all():
+            print("[WARN] Remapped parameters still do not pass feasibility check")
+        else:
+            print("[INFO] Feasibility solved")
 
     if export_file:
         # 1. Define and create the results directory
@@ -1020,7 +1039,8 @@ def solve_dynamics(robot:Any, config:dict, sigma_pi: Optional[np.ndarray] = None
         return (hat_par_REG, hat_par_Ia, results)
 
 
-def LMI_projection(robot:Any, weights:Optional[np.ndarray] = None, psd_tol:float = 1e-5) -> np.ndarray :
+def LMI_projection(robot:Any, weights:Optional[np.ndarray] = None, psd_tol:float = 1e-5,
+                   par_DYN:Optional[np.ndarray] = None, links:Optional[list[int]] = None) -> np.ndarray :
     """
     Projection of the estimated parameters into the nearest pheasible set of parameter via an Linear Matrix Inequality problem.
     min || par_DYN_proj - par_DYN ||_w ^2
@@ -1034,15 +1054,17 @@ def LMI_projection(robot:Any, weights:Optional[np.ndarray] = None, psd_tol:float
                      (e.g., thunder_franka, thunder_ahand_finger).
         weights (np.ndarray, optional): weights for the projection cost function. Defaults to None.
         threshold (float, optional): threshold for positive definiteness. Defaults to 1e-5.
+        par_DYN (np.ndarray, optional): standard dynamic parameters to project. Defaults to robot.get_par_DYN().
+        links (list[int], optional): indices of the links to project, the others are left unchanged. Defaults to all links.
     Returns:
         np.ndarray: Feasible set of parameters
     """
 
     import cvxpy as cp
 
-    par_DYN = robot.get_par_DYN().copy()
+    par_DYN = robot.get_par_DYN().copy() if par_DYN is None else np.asarray(par_DYN, dtype=float).flatten().copy()
     n = robot.numJoints
-    for i in range(n):
+    for i in (range(n) if links is None else links):
         # Dynamic parameters o i-th link
         par_DYN_proj = cp.Variable(10)
 
@@ -1051,10 +1073,9 @@ def LMI_projection(robot:Any, weights:Optional[np.ndarray] = None, psd_tol:float
             com_max = np.linalg.norm(par_DYN[i*10 + 1:i*10 + 4])
             I_max = np.linalg.norm(par_DYN[i*10 + 4:i*10 + 10])  # Extract inertia values
 
-            W = np.eye(10)
-            W[0,0] = 1/(m_max)  # Weight for mass parameters
-            W[1:4, 1:4] = 1/(com_max)  # Weight for CoM parameters
-            W[4:10, 4:10] = 1/(I_max)  # Weight for inertia parameters
+            # Diagonal weights (previous BUG: W[1:4, 1:4] = ... filled the whole block, penalising only the
+            # sum of the CoM / inertia deviations)
+            W = np.diag([1/m_max] + [1/com_max]*3 + [1/I_max]*6)
         else:
             W = cp.diag(weights)
 
@@ -1078,9 +1099,7 @@ def LMI_projection(robot:Any, weights:Optional[np.ndarray] = None, psd_tol:float
         constraints += [m >= 1e-5]
         prob = cp.Problem(cp.Minimize(J), constraints)
         prob.solve(solver=cp.SCS, verbose=False)
-
-        print(f"Link {i}: Projection optimization status: {prob.status}, optimal value: {prob.value}")
-        par_DYN[i*10 + 1:i*10 + 4] = par_DYN_proj.value.flatten().copy()
+        par_DYN[i*10:(i+1)*10] = par_DYN_proj.value.flatten().copy()
 
     return par_DYN
 
@@ -1388,7 +1407,7 @@ def load_prior(prior_path:str) -> dict :
     return prior
 
 
-def check_par_DYN_feasibility(par_DYN:np.ndarray ,n: int, verbose: bool = False) -> bool:
+def check_par_DYN_feasibility(par_DYN:np.ndarray ,n: int, verbose: bool = False, tol: float = 0.0) -> np.ndarray:
     """ 
     Return whether a set of dynamic parameters is feasible.
 
@@ -1396,17 +1415,21 @@ def check_par_DYN_feasibility(par_DYN:np.ndarray ,n: int, verbose: bool = False)
         par_DYN (np.ndarray): standar dynamic parameters of robot model.
         n (int): Number of robot link.
         verbose (bool, optional): Wheter run in verbose mode. Default is false.
+        tol (float, optional): Accepted violation of the triangle inequalities, tr(I)/2 - l_max(I) > -tol [Kg m^2].
+                               When the optimum lies on the feasibility boundary (degenerate inertia) the solver
+                               meets the constraint only up to its constraint tolerance, so use that value
+                               (IPOPT constr_viol_tol, divided by the inertia scale factor). Default is 0 (strict).
 
     Returns:
-        bool: feasibility of link given link. """
-    feas_flag = True
+        np.ndarray: (n,) boolean array, feasibility of each link. """
+    feas_flag = np.ones(n, dtype=bool)
     for i in range(n):
         # Mass check
         par_DYN_link_i = par_DYN[10*i:10*(i+1)]
         if par_DYN_link_i[0] <= 0: 
             if verbose: 
                 print(f"mass of link {i} is non positive")
-                feas_flag = False
+            feas_flag[i] = False
 
         # Triangular inequalities
         Ib = np.zeros((3,3))
@@ -1422,11 +1445,11 @@ def check_par_DYN_feasibility(par_DYN:np.ndarray ,n: int, verbose: bool = False)
 
         eig,_ = np.linalg.eig(Ib)
         l_max = np.max(eig)
-        if not (np.trace(Ib)/2 - l_max > 0): 
+        if not (np.trace(Ib)/2 - l_max > -tol): 
             if verbose:  print(f"Inertia of link {i} do not pass matrix inequality test. (resid: {np.trace(Ib)/2 - l_max})")
-            feas_flag = False
+            feas_flag[i] = False
 
-    if verbose and feas_flag:  print(f"Test passed")
+    if verbose and feas_flag.all():  print(f"Test passed")
 
     return feas_flag
 

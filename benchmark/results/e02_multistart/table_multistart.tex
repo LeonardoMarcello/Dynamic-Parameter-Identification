@@ -1,0 +1,18 @@
+\begin{table}[t]
+\caption{Multi-start robustness of the proposed MLE step (IPOPT, 101 starts per case: prior, 50 random physically
+consistent bodies, 50 Gaussian perturbations of the prior, $\mathcal{N}(0,\sigma^2)$ with $\sigma$ the prior std.\ dev.). Converged: IPOPT success with the exact eigenvalue constraint
+or, where it fails, with the fallback on 2000 sampled directions (in parentheses, number of fallback runs). Mean $\pm$ std.\ dev.\ over the converged runs of the relative
+cost gap to the best run and of the parameter deviation relative to the best MLE solution (per link: mass,
+CoM norm, Frobenius norm of the inertia), over all links.}
+\label{tab:multistart}
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
+\toprule
+Case & Conv. & Cost gap (J)& $|\Delta m|/m^\star$ & $\|\Delta c\|/\|c^\star\|$ & $\|\Delta I\|_F/\|I^\star\|_F$ & Held-out RMSE [N\,m]\\
+\midrule
+Real, full window & 101/101 (40) & $1.8\cdot10^{-4} \pm 1.5\cdot10^{-4}$ & $1.7\cdot10^{-4} \pm 2.1\cdot10^{-4}$ & $1.4\cdot10^{-3} \pm 2.4\cdot10^{-3}$ & $2.0\cdot10^{-3} \pm 2.5\cdot10^{-3}$ & -- \\
+Real, fold A & 101/101 (16) & $3.0\cdot10^{-4} \pm 1.3\cdot10^{-4}$ & $7.0\cdot10^{-5} \pm 1.1\cdot10^{-4}$ & $1.5\cdot10^{-3} \pm 1.5\cdot10^{-3}$ & $5.8\cdot10^{-3} \pm 5.1\cdot10^{-3}$ & $1.030 \pm 2.5\cdot10^{-4}$ \\
+Real, fold B & 101/101 (44) & $3.1\cdot10^{-4} \pm 2.7\cdot10^{-4}$ & $5.8\cdot10^{-5} \pm 7.6\cdot10^{-5}$ & $9.2\cdot10^{-4} \pm 1.4\cdot10^{-3}$ & $5.0\cdot10^{-3} \pm 8.4\cdot10^{-3}$ & $0.753 \pm 4.9\cdot10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

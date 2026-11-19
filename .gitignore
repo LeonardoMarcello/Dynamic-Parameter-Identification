@@ -3,4 +3,6 @@
 **/__pycache__/
 **/*.pyc
 rosbag/
+doc/*
+!doc/pipeline.png
 *.db3

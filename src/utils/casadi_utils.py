@@ -126,7 +126,7 @@ def dyn2reg(par_DYN: casadi.MX | casadi.SX, par_per_link: int = 10) -> casadi.MX
         )
 
         # Swapped to exact structural match for spatial mechanics consistency
-        I = I_dyn - I_tmp_v
+        I = I_dyn + I_tmp_v
         par_REG.append(casadi.vertcat(mass, mCoM, I))
 
     return casadi.vertcat(*par_REG)

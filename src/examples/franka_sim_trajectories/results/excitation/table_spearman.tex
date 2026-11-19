@@ -1,0 +1,17 @@
+\begin{table}[htpb]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Criterion} & \textbf{RMSE LS} & \textbf{RMSE MLE} & \textbf{BIP err. LS} & \textbf{BIP err. MLE} \\
+\hline
+condition number $\kappa$ & $\mathbf{+0.95}$ (7.8e-23) & $\mathbf{+0.91}$ (4.5e-18) & $\mathbf{+0.92}$ (1.1e-18) & $\mathbf{+0.45}$ (1.7e-03) \\
+trace$(W^TW)$ (T-opt.) & $\mathbf{-0.89}$ (6.6e-16) & $\mathbf{-0.89}$ (6.0e-16) & $\mathbf{-0.88}$ (1.3e-15) & $\mathbf{-0.55}$ (8.3e-05) \\
+log det$(W^TW)$ (D-opt.) & $\mathbf{-0.94}$ (9.1e-22) & $\mathbf{-0.93}$ (8.5e-21) & $\mathbf{-0.92}$ (1.3e-19) & $\mathbf{-0.52}$ (2.4e-04) \\
+max $\sigma_{\pi,\%}$ & $-0.40$ (7.0e-03) & $-0.41$ (5.2e-03) & $-0.42$ (3.9e-03) & $-0.22$ (1.6e-01) \\
+\hline
+\end{tabular}
+}
+\caption{Spearman rank correlation ($p$-value) between excitation criteria and accuracy over 45 identification windows; MLE with a 30% perturbed prior. Bold: expected sign and $p<0.05$.}
+\label{tab:excitation_spearman}
+\end{table}
