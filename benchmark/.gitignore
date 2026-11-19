@@ -6,5 +6,6 @@
 !/results/
 !/README.md
 !/run.sh
+!/requirements.txt
 __pycache__/
 *.pyc
